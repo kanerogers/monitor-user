@@ -3,22 +3,27 @@
     %link{rel: "stylesheet", href: "/css/normalize.css"}
     %link{rel: "stylesheet", href: "/css/foundation.css"}
   %body
-    .row
-      .large-12.columns
-        %h1 What's up?
-        %h4.subheader Let's do this.
-    .row{"ng-app" => ""}
+    %div{"ng-app" => ""}
       %div{"ng-controller" => "MonitorCtrl"}
-        .large-12.columns
-          %table{style: "width: 100%"}
-            %tr
-              %th Time
-              %th Name
-              %th URL
-            %tr{"ng-repeat" => "request in requests"}
-              %td {{request.time}}
-              %td {{request.name}}
-              %td {{request.url}}
+        .row
+          .large-12.columns
+            %h1 Monitor User
+        .row
+          .large-4.columns
+            %label Filter
+            %input{type: "text", "ng-model" => "name_filter", default: ""}
+
+        .row
+          .large-12.columns
+            %table{style: "width: 100%"}
+              %tr
+                %th Time
+                %th Name
+                %th URL
+              %tr{"ng-repeat" => "request in requests | filter:name_filter"}
+                %td {{request.time}}
+                %td {{request.name}}
+                %td {{request.url}}
 
 
     %script{src: '/js/angular.js'}
