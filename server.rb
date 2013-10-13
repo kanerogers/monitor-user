@@ -7,7 +7,7 @@ EM.run do
   connections = []
   class UserLiveLogging < Sinatra::Base
     get '/' do
-      erb :index
+      haml :index
     end
 
     get '/subscribe' do
