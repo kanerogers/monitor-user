@@ -2,6 +2,7 @@ require 'sinatra/base'
 require 'eventmachine'
 require 'eventmachine-tail'
 require 'thin'
+require 'json'
 
 EM.run do
   connections = []
@@ -33,13 +34,24 @@ EM.run do
     def receive_data(data)
       puts "GOT DATA."
       @buffer.extract(data).each do |line|
+        request = process_line(line)
         @connections.each do |out|
           out << "event: boom\n"
-          out << "data: #{line}\n"
+          out << "data: #{request}\n"
           out << "\n"
         end
         puts "OK finished."
       end
+    end
+
+    def process_line(line)
+      data = line.split ","
+
+      {
+        time: data[0],
+        name: data[1],
+        url: data[2]
+      }.to_json
     end
   end 
 

@@ -1,8 +1,25 @@
 %html
   %head
-    %link{rel: "stylesheet", href: "bower_components/whatever"}
+    %link{rel: "stylesheet", href: "/css/normalize.css"}
+    %link{rel: "stylesheet", href: "/css/foundation.css"}
   %body
-    %article#log
+    .row
+      .large-12.columns
+        %h1 What's up?
+        %h4.subheader Let's do this.
+    .row{"ng-app" => ""}
+      %div{"ng-controller" => "MonitorCtrl"}
+        .large-12.columns
+          %table{style: "width: 100%"}
+            %tr
+              %th Time
+              %th Name
+              %th URL
+            %tr{"ng-repeat" => "request in requests"}
+              %td {{request.time}}
+              %td {{request.name}}
+              %td {{request.url}}
 
-    %script{src: '/bower_components/angular/angular.js'}
+
+    %script{src: '/js/angular.js'}
     %script{src: '/js/app.js'}
