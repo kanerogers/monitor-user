@@ -1,7 +1,10 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    eventmachine (1.0.3)
     eventmachine (1.0.3-java)
+    eventmachine-tail (0.6.4)
+      eventmachine
     rack (1.5.2)
     rack-protection (1.5.0)
       rack
@@ -13,7 +16,9 @@ GEM
 
 PLATFORMS
   java
+  ruby
 
 DEPENDENCIES
   eventmachine
+  eventmachine-tail
   sinatra

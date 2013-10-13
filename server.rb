@@ -1,43 +1,50 @@
-require 'sinatra'
-require 'file-tail'
+require 'sinatra/base'
+require 'eventmachine'
+require 'eventmachine-tail'
+require 'thin'
 
-conns = []
-get '/' do
-  erb :index
-end
-
-get '/subscribe' do
-  content_type 'text/event-stream'
-  stream(:keep_open) do |out|
-    conns << out
-    out.callback { conns.delete(out) }
-  end
-end
-
-
-Thread.new do
-  puts "Ready to go."
-  File::Tail::Logfile.tail("test_file", :backward => 10) do |line|
-    puts "Got line."
-    puts line
-    conns.each do |out|
-      out << "event: boom\n"
-      out << "data: #{line}\n"
-      out << "\n"
+EM.run do
+  connections = []
+  class UserLiveLogging < Sinatra::Base
+    get '/' do
+      erb :index
     end
-    puts "OK finished."
+
+    get '/subscribe' do
+      connections = settings.connections
+
+      content_type 'text/event-stream'
+      stream(:keep_open) do |out|
+        connections << out
+        out.callback { connections.delete(out) }
+      end
+    end
+  end
+
+  class Reader < EventMachine::FileTail
+    def initialize(path, connections)
+      @connections = connections
+      startpos=-1
+      super(path, startpos)
+      puts "Tailing #{path}"
+      @buffer = BufferedTokenizer.new
+    end
+
+    def receive_data(data)
+      puts "GOT DATA."
+      @buffer.extract(data).each do |line|
+        @connections.each do |out|
+          out << "event: boom\n"
+          out << "data: #{line}\n"
+          out << "\n"
+        end
+        puts "OK finished."
+      end
+    end
   end 
+
+  Reader.new "./test_file", connections
+
+  UserLiveLogging.set :connections, connections
+  Thin::Server.start UserLiveLogging, '0.0.0.0', 3000
 end
-
-__END__
-
-@@ index
-  <article id="log"></article>
- 
-  <script>
-    var source = new EventSource('/subscribe');
- 
-    source.addEventListener('boom', function (event) {
-      log.innerText += '\n' + event.data;
-    }, false);
-  </script>
